@@ -1,0 +1,21 @@
+{
+    "name": "leopersan/r2d2",
+    "require": {
+        "laravel/framework": "^8.0",
+        "laravel/envoy": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Leopersan\\R2d2\\": "src/"
+        }
+    },
+    "bin": [
+        "bin/r2d2"
+    ],
+    "authors": [
+        {
+            "name": "Leonardo Persan",
+            "email": "leopso1990@gmail.com"
+        }
+    ]
+}
