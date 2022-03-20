@@ -6,11 +6,11 @@ define('LARAVEL_START', microtime(true));
 if (file_exists(__DIR__.'/vendor/autoload.php')) {
     require __DIR__.'/vendor/autoload.php';
 } else {
-    require __DIR__.'/../../autoload.php';
+    require __DIR__.'/../autoload.php';
 }
 
 $app = new Illuminate\Foundation\Application(
-    $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
+    $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__.'/../leopersan/r2d2/src')
 );
 
 $app->singleton(
