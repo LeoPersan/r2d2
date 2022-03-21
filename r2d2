@@ -23,6 +23,8 @@ $app->singleton(
     Illuminate\Foundation\Exceptions\Handler::class
 );
 
+$app->useAppPath(__DIR__.'/src');
+
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 
 $status = $kernel->handle(
