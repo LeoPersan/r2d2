@@ -8,7 +8,7 @@ class Kernel extends ConsoleKernel
 {
     protected function commands()
     {
-        $this->load(__DIR__.'/commands');
+        $this->load(__DIR__.'/Commands');
 
         require __DIR__.'/routes.php';
     }
