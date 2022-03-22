@@ -2,9 +2,11 @@
 
 namespace Leopersan\R2d2\Commands;
 
+use Illuminate\Config\Repository;
 use Illuminate\Support\Str;
 use LogicException;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Finder\Finder;
 
 class PolicyMakeCommand extends GeneratorCommand
 {
@@ -76,7 +78,7 @@ class PolicyMakeCommand extends GeneratorCommand
      */
     protected function userProviderModel()
     {
-        $config = $this->laravel['config'];
+        $config = $this->getConfig();
 
         $guard = $this->option('guard') ?: $config->get('auth.defaults.guard');
 
@@ -193,5 +195,36 @@ class PolicyMakeCommand extends GeneratorCommand
             ['model', 'm', InputOption::VALUE_OPTIONAL, 'The model that the policy applies to'],
             ['guard', 'g', InputOption::VALUE_OPTIONAL, 'The guard that the policy relies on'],
         ];
+    }
+
+    public function getConfig()
+    {
+        $items = [];
+        
+        if (is_file($cached = getcwd().'/bootstrap/cache/config.php')) {
+            $items = require $cached;
+            
+            $loadedFromCache = true;
+        }
+        $config = new Repository($items);
+        
+        if (! isset($loadedFromCache)) {
+            $configPath = getcwd().'/config';
+            
+            $files = [];
+            foreach (Finder::create()->files()->name('*.php')->in($configPath) as $file) {
+                if ($directory = trim(str_replace($configPath, '', $file->getPath()), DIRECTORY_SEPARATOR)) {
+                    $directory = str_replace(DIRECTORY_SEPARATOR, '.', $directory).'.';
+                }
+
+                $files[$directory.basename($file->getRealPath(), '.php')] = $file->getRealPath();
+            }
+
+            foreach ($files as $key => $path) {
+                $config->set($key, require $path);
+            }
+        }
+
+        return $config;
     }
 }

@@ -44,7 +44,6 @@ class ModelMakeCommand extends GeneratorCommand
 
         if ($this->option('all')) {
             $this->input->setOption('factory', true);
-            $this->input->setOption('seed', true);
             $this->input->setOption('migration', true);
             $this->input->setOption('controller', true);
             $this->input->setOption('policy', true);
@@ -57,10 +56,6 @@ class ModelMakeCommand extends GeneratorCommand
 
         if ($this->option('migration')) {
             $this->createMigration();
-        }
-
-        if ($this->option('seed')) {
-            $this->createSeeder();
         }
 
         if ($this->option('controller') || $this->option('resource') || $this->option('api')) {
@@ -103,20 +98,6 @@ class ModelMakeCommand extends GeneratorCommand
         $this->call('make:migration', [
             'name' => "create_{$table}_table",
             '--create' => $table,
-        ]);
-    }
-
-    /**
-     * Create a seeder file for the model.
-     *
-     * @return void
-     */
-    protected function createSeeder()
-    {
-        $seeder = Str::studly(class_basename($this->argument('name')));
-
-        $this->call('make:seeder', [
-            'name' => "{$seeder}Seeder",
         ]);
     }
 
@@ -187,7 +168,7 @@ class ModelMakeCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return is_dir(app_path('Models')) ? $rootNamespace.'\\Models' : $rootNamespace;
+        return $rootNamespace.'\\Models';
     }
 
     /**

@@ -54,4 +54,9 @@ abstract class GeneratorCommand extends Base
 
         return getcwd().'/app/'.str_replace('\\', '/', $name).'.php';
     }
+
+    protected function rootNamespace()
+    {
+        return 'App\\';
+    }
 }
