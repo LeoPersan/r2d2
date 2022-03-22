@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Console\Migrations\TableGuesser;
 use Illuminate\Support\Composer;
 use Illuminate\Support\Str;
+use Symfony\Component\Process\Process;
 
 class MigrateMakeCommand extends Command
 {
@@ -94,7 +95,7 @@ class MigrateMakeCommand extends Command
         // make sure that the migrations are registered by the class loaders.
         $this->writeMigration($name, $table, $create);
 
-        $this->composer->dumpAutoloads();
+        Process::fromShellCommandline('composer dumpautoload')->mustRun();
     }
 
     /**
