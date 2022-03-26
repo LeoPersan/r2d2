@@ -2,6 +2,7 @@
 
 namespace Leopersan\R2d2\Commands;
 
+use Symfony\Component\Console\Input\InputOption;
 
 class RequestMakeCommand extends GeneratorCommand
 {
@@ -58,5 +59,27 @@ class RequestMakeCommand extends GeneratorCommand
     protected function getDefaultNamespace($rootNamespace)
     {
         return $rootNamespace.'\Http\Requests';
+    }
+
+    /**
+     * Replace the class name for the given stub.
+     *
+     * @param  string  $stub
+     * @param  string  $name
+     * @return string
+     */
+    protected function replaceClass($stub, $name)
+    {
+        $fields = explode(',', $this->option('fields'));
+        $rules = collect($fields)->map(fn ($field) => "'{$field}' => 'required|string',")->join("\n\t\t\t");
+
+        return str_replace('{{ rules }}',$rules,parent::replaceClass($stub, $name));
+    }
+
+    protected function getOptions()
+    {
+        return [
+            ['fields', null, InputOption::VALUE_REQUIRED, 'The name fields separeted with comma'],
+        ];
     }
 }
