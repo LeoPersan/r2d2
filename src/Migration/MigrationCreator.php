@@ -54,7 +54,7 @@ class MigrationCreator
      *
      * @throws \Exception
      */
-    public function create($name, $path, $table = null, $create = false)
+    public function create($name, $path, $table = null, $create = false, $fields = false)
     {
         $this->ensureMigrationDoesntAlreadyExist($name, $path);
 
@@ -68,7 +68,7 @@ class MigrationCreator
         $this->files->ensureDirectoryExists(dirname($path));
 
         $this->files->put(
-            $path, $this->populateStub($name, $stub, $table)
+            $path, $this->populateStub($name, $stub, $table, $fields)
         );
 
         // Next, we will fire any hooks that are supposed to fire after a migration is
@@ -137,7 +137,7 @@ class MigrationCreator
      * @param  string|null  $table
      * @return string
      */
-    protected function populateStub($name, $stub, $table)
+    protected function populateStub($name, $stub, $table, $fields)
     {
         $stub = str_replace(
             ['DummyClass', '{{ class }}', '{{class}}'],
@@ -151,6 +151,22 @@ class MigrationCreator
             $stub = str_replace(
                 ['DummyTable', '{{ table }}', '{{table}}'],
                 $table, $stub
+            );
+        }
+
+        if ($fields) {
+            if (strpos('create', $stub) !== false)
+                $colunms = collect($fields)->map(fn ($field) => "\$table->string('{$field}');")->join("\n\t\t\t");
+            else {
+                $colunms = collect($fields)->map(fn ($field) => "\$table->string('{$field}')->nullable();")->join("\n\t\t\t");
+                $dropColunms = collect($fields)->map(fn ($field) => "\$table->dropColumn('{$field}');")->join("\n\t\t\t");
+            }
+            $stub = str_replace(
+                ['DummyFields', '{{ colunms }}', '{{colunms}}'],
+                $colunms, str_replace(
+                    ['DummyDropFields', '{{ dropColunms }}', '{{dropColunms}}'],
+                    $dropColunms ?? '', $stub
+                )
             );
         }
 
