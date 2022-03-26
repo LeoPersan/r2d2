@@ -3,6 +3,7 @@
 namespace Leopersan\R2d2\Commands;
 
 use Illuminate\Console\Concerns\CreatesMatchingTest;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -84,7 +85,9 @@ class ControllerMakeCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace.'\Http\Controllers';
+        if ($this->option('model'))
+            return $rootNamespace.'\Http\Controllers\Admin';
+        return $rootNamespace.'\Http\Controllers\Front';
     }
 
     /**
@@ -170,8 +173,11 @@ class ControllerMakeCommand extends GeneratorCommand
             '{{ model }}' => class_basename($modelClass),
             '{{model}}' => class_basename($modelClass),
             'DummyModelVariable' => lcfirst(class_basename($modelClass)),
+            'DummyPluralModelVariable' => Str::plural(lcfirst(class_basename($modelClass))),
             '{{ modelVariable }}' => lcfirst(class_basename($modelClass)),
+            '{{ pluralModelVariable }}' => Str::plural(lcfirst(class_basename($modelClass))),
             '{{modelVariable}}' => lcfirst(class_basename($modelClass)),
+            '{{pluralModelVariable}}' => Str::plural(lcfirst(class_basename($modelClass))),
         ]);
     }
 
@@ -208,9 +214,7 @@ class ControllerMakeCommand extends GeneratorCommand
         if ($this->option('requests')) {
             $namespace = 'App\\Http\\Requests';
 
-            [$storeRequestClass, $updateRequestClass] = $this->generateFormRequests(
-                $modelClass, $storeRequestClass, $updateRequestClass
-            );
+            [$storeRequestClass, $updateRequestClass] = $this->generateFormRequests($modelClass);
         }
 
         $namespacedRequests = $namespace.'\\'.$storeRequestClass.';';
@@ -241,21 +245,15 @@ class ControllerMakeCommand extends GeneratorCommand
      * @param  string  $updateRequestClass
      * @return array
      */
-    protected function generateFormRequests($modelClass, $storeRequestClass, $updateRequestClass)
+    protected function generateFormRequests($modelClass)
     {
-        $storeRequestClass = 'Store'.class_basename($modelClass).'Request';
+        $storeRequestClass = class_basename($modelClass).'\\Salvar';
 
         $this->call('make:request', [
             'name' => $storeRequestClass,
         ]);
 
-        $updateRequestClass = 'Update'.class_basename($modelClass).'Request';
-
-        $this->call('make:request', [
-            'name' => $updateRequestClass,
-        ]);
-
-        return [$storeRequestClass, $updateRequestClass];
+        return [$storeRequestClass, $storeRequestClass];
     }
 
     /**

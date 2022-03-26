@@ -5,6 +5,7 @@ namespace {{ namespace }};
 use {{ namespacedModel }};
 use {{ rootNamespace }}Http\Controllers\Controller;
 use {{ namespacedRequests }}
+use Illuminate\Http\Request;
 
 class {{ class }} extends Controller
 {
@@ -13,9 +14,11 @@ class {{ class }} extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        return view('admin.{{ pluralModelVariable }}.index', [
+            'data' => {{ model }}::pesquisar($request)->paginate(config('app.list_count'))->appends($request->except('page')),
+        ]);
     }
 
     /**
@@ -25,29 +28,10 @@ class {{ class }} extends Controller
      */
     public function create()
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \{{ namespacedStoreRequest }}  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store({{ storeRequest }} $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \{{ namespacedModel }}  ${{ modelVariable }}
-     * @return \Illuminate\Http\Response
-     */
-    public function show({{ model }} ${{ modelVariable }})
-    {
-        //
+        ${{ modelVariable }} = new {{ model }};
+        return view('admin.{{ pluralModelVariable }}.form', [
+            'data' => ${{ modelVariable }},
+        ]);
     }
 
     /**
@@ -58,19 +42,28 @@ class {{ class }} extends Controller
      */
     public function edit({{ model }} ${{ modelVariable }})
     {
-        //
+        return view('admin.{{ pluralModelVariable }}.form', [
+            'data' => ${{ modelVariable }},
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Store a newly created resource in storage.
      *
-     * @param  \{{ namespacedUpdateRequest }}  $request
-     * @param  \{{ namespacedModel }}  ${{ modelVariable }}
+     * @param  \{{ namespacedStoreRequest }}  $request
      * @return \Illuminate\Http\Response
      */
-    public function update({{ updateRequest }} $request, {{ model }} ${{ modelVariable }})
+    public function store({{ storeRequest }} $request)
     {
-        //
+        ${{ modelVariable }} = {{ model }}::findOrNew($request->id);
+        ${{ modelVariable }}->fill($request->validated());
+        ${{ modelVariable }}->save();
+
+        return [
+            'result'=> true,
+            'msg' => '{{ model }} '.($request->id ? 'alterado' : 'criado').' com sucesso!',
+            'redirect' => route('{{ pluralModelVariable }}.index')
+        ];
     }
 
     /**
@@ -81,6 +74,11 @@ class {{ class }} extends Controller
      */
     public function destroy({{ model }} ${{ modelVariable }})
     {
-        //
+        ${{ modelVariable }}->delete();
+        return [
+            'result' => true,
+            'msg' => '{{ model }} excluído com sucesso!',
+            'redirect' => route('{{ pluralModelVariable }}.index'),
+        ];
     }
 }
