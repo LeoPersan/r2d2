@@ -192,4 +192,22 @@ class ModelMakeCommand extends GeneratorCommand
             ['requests', 'R', InputOption::VALUE_NONE, 'Create new form request classes and use them in the resource controller'],
         ];
     }
+
+    /**
+     * Replace the class name for the given stub.
+     *
+     * @param  string  $stub
+     * @param  string  $name
+     * @return string
+     */
+    protected function replaceClass($stub, $name)
+    {
+        $class = str_replace($this->getNamespace($name).'\\', '', $name);
+
+        return str_replace(
+            ['DummyPluralModelVariable', '{{ pluralModelVariable }}', '{{pluralModelVariable}}'],
+            Str::plural(lcfirst(class_basename($class))),
+            parent::replaceClass($stub, $name)
+        );
+    }
 }

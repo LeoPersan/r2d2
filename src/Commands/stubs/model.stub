@@ -2,10 +2,47 @@
 
 namespace {{ namespace }};
 
+use App\Casts\Arquivo;
+use App\Models\Helpers\CawModel;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
-class {{ class }} extends Model
+class {{ class }} extends CawModel
 {
     use HasFactory;
+    protected $fillable = [''];
+    protected $casts = [
+        'ativo' => 'boolean',
+        'imagem' => Arquivo::class,
+    ];
+    public $paths = [
+        'imagem' => '{{ pluralModelVariable }}/imagem',
+    ];
+
+    public function scopePesquisar(Builder $builder, Request $request)
+    {
+        return $builder->texto($request->texto)
+                        ->ativo($request->ativo);
+    }
+
+    public function scopeTexto(Builder $builder, $texto = false)
+    {
+        if (!$texto)
+            return $builder;
+        return $builder->where('titulo', 'like', '%'.$texto.'%');
+    }
+
+    public function scopeAtivo(Builder $builder, $ativo = null)
+    {
+        if ($ativo === null)
+            return $builder;
+        return $builder->whereAtivo((bool) $ativo);
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+        static::addGlobalScope('ordem', fn (Builder $builder) => $builder->orderBy('id', 'desc'));
+    }
 }
