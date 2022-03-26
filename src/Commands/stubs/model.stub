@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class {{ class }} extends CawModel
 {
     use HasFactory;
-    protected $fillable = [''];
+    protected $fillable = [{{ fillable }}];
     protected $casts = [
         'ativo' => 'boolean',
         'imagem' => Arquivo::class,

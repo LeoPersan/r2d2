@@ -134,6 +134,7 @@ class ModelMakeCommand extends GeneratorCommand
             '--model' => $this->option('resource') || $this->option('api') ? $modelName : null,
             '--api' => $this->option('api'),
             '--requests' => $this->option('requests') || $this->option('all'),
+            '--fields' => $this->option('fields'),
         ]));
     }
 
@@ -199,6 +200,7 @@ class ModelMakeCommand extends GeneratorCommand
             ['all', 'a', InputOption::VALUE_NONE, 'Generate a migration, seeder, factory, policy, and resource controller for the model'],
             ['controller', 'c', InputOption::VALUE_NONE, 'Create a new controller for the model'],
             ['factory', 'f', InputOption::VALUE_NONE, 'Create a new factory for the model'],
+            ['fields', null, InputOption::VALUE_REQUIRED, 'The name fields separeted with comma'],
             ['force', null, InputOption::VALUE_NONE, 'Create the class even if the model already exists'],
             ['migration', 'm', InputOption::VALUE_NONE, 'Create a new migration file for the model'],
             ['policy', null, InputOption::VALUE_NONE, 'Create a new policy for the model'],
@@ -220,10 +222,19 @@ class ModelMakeCommand extends GeneratorCommand
     protected function replaceClass($stub, $name)
     {
         $class = str_replace($this->getNamespace($name).'\\', '', $name);
+        $plural = Str::plural(lcfirst(class_basename($class)));
+        $fields = explode(',', $this->option('fields'));
+        $fillable = "'".implode("', '", $fields)."'";
 
         return str_replace(
-            ['DummyPluralModelVariable', '{{ pluralModelVariable }}', '{{pluralModelVariable}}'],
-            Str::plural(lcfirst(class_basename($class))),
+            [
+                'DummyPluralModelVariable', '{{ pluralModelVariable }}', '{{pluralModelVariable}}',
+                'DummyFillable', '{{ fillable }}', '{{fillable}}',
+            ],
+            [
+                $plural,$plural,$plural,
+                $fillable,$fillable,$fillable,
+            ],
             parent::replaceClass($stub, $name)
         );
     }
