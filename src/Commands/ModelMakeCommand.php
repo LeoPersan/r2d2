@@ -58,6 +58,10 @@ class ModelMakeCommand extends GeneratorCommand
             $this->createMigration();
         }
 
+        if ($this->option('seed')) {
+            $this->createSeeder();
+        }
+
         if ($this->option('controller') || $this->option('resource') || $this->option('api')) {
             $this->createController();
         }
@@ -98,6 +102,20 @@ class ModelMakeCommand extends GeneratorCommand
         $this->call('make:migration', [
             'name' => "create_{$table}_table",
             '--create' => $table,
+        ]);
+    }
+
+    /**
+     * Create a seeder file for the model.
+     *
+     * @return void
+     */
+    protected function createSeeder()
+    {
+        $seeder = Str::studly(class_basename($this->argument('name')));
+
+        $this->call('make:seeder', [
+            'name' => "{$seeder}Seeder",
         ]);
     }
 
