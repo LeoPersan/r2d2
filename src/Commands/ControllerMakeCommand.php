@@ -110,6 +110,7 @@ class ControllerMakeCommand extends GeneratorCommand
 
         if ($this->option('model')) {
             $replace = $this->buildModelReplacements($replace);
+            $this->generateViews();
         }
 
         $replace["use {$controllerNamespace}\Controller;\n"] = '';
@@ -172,12 +173,12 @@ class ControllerMakeCommand extends GeneratorCommand
             'DummyModelClass' => class_basename($modelClass),
             '{{ model }}' => class_basename($modelClass),
             '{{model}}' => class_basename($modelClass),
-            'DummyModelVariable' => lcfirst(class_basename($modelClass)),
-            'DummyPluralModelVariable' => Str::plural(lcfirst(class_basename($modelClass))),
-            '{{ modelVariable }}' => lcfirst(class_basename($modelClass)),
-            '{{ pluralModelVariable }}' => Str::plural(lcfirst(class_basename($modelClass))),
-            '{{modelVariable}}' => lcfirst(class_basename($modelClass)),
-            '{{pluralModelVariable}}' => Str::plural(lcfirst(class_basename($modelClass))),
+            'DummyModelVariable' => Str::snake(class_basename($modelClass)),
+            'DummyPluralModelVariable' => Str::plural(Str::snake(class_basename($modelClass))),
+            '{{ modelVariable }}' => Str::snake(class_basename($modelClass)),
+            '{{ pluralModelVariable }}' => Str::plural(Str::snake(class_basename($modelClass))),
+            '{{modelVariable}}' => Str::snake(class_basename($modelClass)),
+            '{{pluralModelVariable}}' => Str::plural(Str::snake(class_basename($modelClass))),
         ]);
     }
 
@@ -224,14 +225,10 @@ class ControllerMakeCommand extends GeneratorCommand
         }
 
         return array_merge($replace, [
-            '{{ storeRequest }}' => $storeRequestClass,
-            '{{storeRequest}}' => $storeRequestClass,
-            '{{ updateRequest }}' => $updateRequestClass,
-            '{{updateRequest}}' => $updateRequestClass,
+            '{{ storeRequest }}' => class_basename($storeRequestClass),
+            '{{storeRequest}}' => class_basename($storeRequestClass),
             '{{ namespacedStoreRequest }}' => $namespace.'\\'.$storeRequestClass,
             '{{namespacedStoreRequest}}' => $namespace.'\\'.$storeRequestClass,
-            '{{ namespacedUpdateRequest }}' => $namespace.'\\'.$updateRequestClass,
-            '{{namespacedUpdateRequest}}' => $namespace.'\\'.$updateRequestClass,
             '{{ namespacedRequests }}' => $namespacedRequests,
             '{{namespacedRequests}}' => $namespacedRequests,
         ]);
@@ -255,6 +252,28 @@ class ControllerMakeCommand extends GeneratorCommand
         ]);
 
         return [$storeRequestClass, $storeRequestClass];
+    }
+
+    /**
+     * Generate the form requests for the given model and classes.
+     *
+     * @return void
+     */
+    protected function generateViews()
+    {
+        $model = $this->option('model');
+
+        $this->call('make:view', [
+            'name' => $model,
+            'type' => 'index',
+            '--fields' => $this->option('fields'),
+        ]);
+
+        $this->call('make:view', [
+            'name' => $model,
+            'type' => 'form',
+            '--fields' => $this->option('fields'),
+        ]);
     }
 
     /**

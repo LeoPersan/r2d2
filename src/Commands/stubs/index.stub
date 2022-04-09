@@ -1,0 +1,61 @@
+@extends('adminlte::page')
+
+@section('content_header')
+<div class="d-flex justify-content-between">
+    <h1>{{ pluralModel }}</h1>
+    <a href="{{ route('{{ pluralModelVariable }}.create') }}"><button class="btn btn-secondary">Novo {{ modelVariable }}</button></a>
+</div>
+@endsection
+
+@section('content')
+    <div class="card">
+        <div class="card-header">
+            <form class="row mt-2">
+                <legend class="col-12">Pesquisa</legend>
+                {{ search }}
+                <div class="form-group m-0 col-sm-3 col-md-2">
+                    <button type="submit" class="btn btn-primary float-right">
+                        <i class="fas fa-search"></i>
+                        Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="card-body table-responsive">
+            <table id="table" class="table table-bordered table-hover table-sm">
+                <thead>
+                    <tr>
+                        {{ columns }}
+                        <th width="20px"></th>
+                        <th width="20px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach($data as $item)
+                    <tr>
+                        {{ rows }}
+                        <td>
+                            <a href="{{ route('{{ pluralModelVariable }}.edit', [$item->id]) }}" title="Editar">
+                                <button class="btn btn-sm btn-outline-dark"><i class="fas fa-edit"></i></button>
+                            </a>
+                        </td>
+                        <td>
+                            @can('delete', $item)
+                            <form @submit.prevent="destroy('{{ route('{{ pluralModelVariable }}.destroy', [$item->id]) }}',$event)"
+                                confirm="Você tem certeza que deseja excluir esse {{ modelVariable }}?" ok="Sim" cancel="Não">
+                                @csrf
+                                @method('delete')
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                            @endcan
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+            {{ $data->links() }}
+        </div>
+    </div>
+@endsection

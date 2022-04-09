@@ -1,0 +1,29 @@
+@extends('adminlte::page')
+
+@section('content_header')
+    <h1>{{ class }}</h1>
+    <label>{{ $data->id ? $data->nome : 'Novo {{ modelVariable }}' }}</label>
+@endsection
+
+@section('content')
+    <div class="card" :json="[form.setData({{ $data }})]">
+        <div class="card-body">
+            <form @submit.prevent="$refs.submit.submit_form">
+
+                <div class="row">
+                    {{ fields }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-outline-primary btn-block" onclick="history.back(-1)">Cancelar</button>
+                    </div>
+                    <div class="col-md-6">
+                        <submit-btn ref="submit" url="{{ route('{{ pluralModelVariable }}.store') }}" >Salvar</submit-btn>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+@endsection
