@@ -3,6 +3,7 @@
 namespace Leopersan\R2d2\Commands;
 
 use Illuminate\Console\Concerns\CreatesMatchingTest;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -220,23 +221,44 @@ class ModelMakeCommand extends GeneratorCommand
      * @param  string  $name
      * @return string
      */
-    protected function replaceClass($stub, $name)
+    protected function replaceClass($stub, $name): string
     {
         $class = str_replace($this->getNamespace($name).'\\', '', $name);
         $plural = Str::plural(lcfirst(class_basename($class)));
-        $fields = explode(',', $this->option('fields'));
-        $fillable = "'".implode("', '", $fields)."'";
+        $fields = collect(explode(',', $this->option('fields')))->map(fn ($field) => explode(':', $field));
+        $types = $fields->map(fn ($field) => $field[1]);
+        $fields = $fields->map(fn ($field) => $field[0]);
+        $fillable = "'".implode("', '", $fields->toArray())."'";
+        $casts = $this->getCasts($fields, $types);
 
         return str_replace(
             [
+                'DummyCasts', '{{ casts }}', '{{casts}}',
+                'DummyUseArquivo', '{{ useArquivo }}', '{{useArquivo}}',
                 'DummyPluralModelVariable', '{{ pluralModelVariable }}', '{{pluralModelVariable}}',
                 'DummyFillable', '{{ fillable }}', '{{fillable}}',
             ],
             [
+                $casts,$casts,$casts,
+                $this->useArquivo,$this->useArquivo,$this->useArquivo,
                 $plural,$plural,$plural,
                 $fillable,$fillable,$fillable,
             ],
             parent::replaceClass($stub, $name)
         );
+    }
+
+    public function getCasts(Collection $fields, Collection $types): string
+    {
+        $casts = $types->filter(fn ($type) => in_array($type, ['array', 'json', 'boolean']))
+                        ->map(fn ($type, $index) => "\t\t'{$fields[$index]}' => '{$type}',");
+        $arquivos = $types->filter(fn ($type) => $type == 'arquivo')->map(fn ($type, $index) => $fields[$index]);
+        if ($arquivos) {
+            $this->useArquivo = 'use App\Casts\Arquivo;';
+            $arquivos = $arquivos->map(fn ($arquivo) => "\t\t'{$arquivo}' => new Arquivo,")
+                                ->merge(["\t];", "\tpublic \$paths = ["])
+                                ->merge($arquivos->map(fn ($arquivo) => "\t\t'{$arquivo}' => '{{ pluralModelVariable }}/{$arquivo}',"));
+        }
+        return ltrim(implode("\n", $casts->merge($arquivos)->toArray()));
     }
 }

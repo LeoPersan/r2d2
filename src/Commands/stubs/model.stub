@@ -2,7 +2,7 @@
 
 namespace {{ namespace }};
 
-use App\Casts\Arquivo;
+{{ useArquivo }}
 use App\Models\Helpers\CawModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,11 +13,7 @@ class {{ class }} extends CawModel
     use HasFactory;
     protected $fillable = [{{ fillable }}];
     protected $casts = [
-        'ativo' => 'boolean',
-        'imagem' => Arquivo::class,
-    ];
-    public $paths = [
-        'imagem' => '{{ pluralModelVariable }}/imagem',
+        {{ casts }}
     ];
 
     public function scopePesquisar(Builder $builder, Request $request)
