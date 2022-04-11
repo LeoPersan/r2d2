@@ -1,0 +1,25 @@
+html {
+    scroll-behavior: smooth;
+}
+
+.loading {
+    background: #00000066;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    color: #ffffff;
+    z-index: 1100;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+}
+
+input[required],
+select[required],
+textarea[required] {
+    background-image: url(/images/required_field.png);
+    background-repeat: no-repeat;
+    background-position: 1px 1px;
+    background-size: 7px 7px;
+}
