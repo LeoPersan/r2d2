@@ -1,10 +1,5 @@
 <?php
 
-use App\Models\Cliente;
-use App\Models\Configuracao;
-use App\Models\Contrato;
-use App\Models\Indicador;
-use App\Models\ModeloContrato;
 use App\Models\Usuario;
 
 return [
@@ -236,41 +231,6 @@ return [
             'text' => 'Dashboard',
             'route'  => 'admin',
             'icon' => 'fas fa-fw fa-chart-pie',
-        ],
-        [
-            'text' => 'Clientes',
-            'route'  => 'clientes.index',
-            'icon' => 'fas fa-fw fa-users',
-            'can' => 'viewAny',
-            'model' => Cliente::class,
-        ],
-        [
-            'text' => 'Contratos',
-            'route'  => 'contratos.index',
-            'icon' => 'fas fa-fw fa-file-pdf',
-            'can' => 'viewAny',
-            'model' => Contrato::class,
-        ],
-        [
-            'text' => 'Modelos de Contratos',
-            'route'  => 'modelos_contratos.index',
-            'icon' => 'fas fa-fw fa-paste',
-            'can' => 'viewAny',
-            'model' => ModeloContrato::class,
-        ],
-        [
-            'text' => 'Indicadores',
-            'route'  => 'indicadores.index',
-            'icon' => 'fas fa-fw fa-chart-line',
-            'can' => 'viewAny',
-            'model' => Indicador::class,
-        ],
-        [
-            'text' => 'Configurações',
-            'route'  => 'configuracoes.edit',
-            'icon' => 'fas fa-fw fa-cogs',
-            'can' => 'viewAny',
-            'model' => Configuracao::class,
         ],
         [
             'text' => 'Usuários',
