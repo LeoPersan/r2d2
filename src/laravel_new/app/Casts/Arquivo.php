@@ -42,8 +42,8 @@ class Arquivo implements CastsAttributes
     public function getName($value, $model, $key)
     {
         if ($this->isBase64($value))
-            return $model->paths[$key].'-'.date('Y-m-d H:i');
-        return $model->paths[$key].'/'.Str::slug(preg_replace('/\.'.$value->getClientOriginalExtension().'$/', '', $value->getClientOriginalName())).'-'.date('Y-m-d H:i');
+            return $model->paths[$key].'-'.uniqid();
+        return $model->paths[$key].'/'.Str::slug(preg_replace('/\.'.$value->getClientOriginalExtension().'$/', '', $value->getClientOriginalName())).'-'.uniqid();
     }
 
     public function getExtension($value)
