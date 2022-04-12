@@ -16,6 +16,7 @@ Vue.component('Arquivo', require('./components/Arquivo.vue').default);
 Vue.component('Imagem', require('./components/Imagem.vue').default);
 Vue.component('submit-btn', require('./components/SubmitBtn.vue').default);
 Vue.component('editor', require('@tinymce/tinymce-vue').default);
+Vue.component('tinymce', require('./components/Tinymce.vue').default);
 
 
 if (window.vue == undefined) {

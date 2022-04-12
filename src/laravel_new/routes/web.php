@@ -5,7 +5,6 @@ use App\Http\Controllers\Admin\HomeController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\RecuperarSenhaController;
 use App\Http\Controllers\Admin\UsuarioController;
-use App\Http\Controllers\DocuSignController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => 'guest:admin'], function () {
@@ -16,10 +15,10 @@ Route::group(['middleware' => 'guest:admin'], function () {
     Route::get('/atualizar_senha/{token}', [AtualizarSenhaController::class, 'showResetForm'])->name('atualizar_senha');
     Route::post('/atualizar_senha', [AtualizarSenhaController::class, 'reset']);
 });
-Route::get('/ds/callback', [DocuSignController::class, 'callback'])->name('ds.callback');
 Route::group(['middleware' => ['auth:admin']], function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/', [HomeController::class, 'index'])->name('admin');
+    Route::post('upload_imagens', [HomeController::class, 'upload_imagens'])->name('upload_imagens');
     Route::get('meus_dados', [UsuarioController::class, 'meusDados'])->name('meus_dados');
     Route::post('meus_dados', [UsuarioController::class, 'postMeusDados']);
     Route::get('trocar_senha', [UsuarioController::class, 'trocarSenha'])->name('trocar_senha');
