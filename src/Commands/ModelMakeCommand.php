@@ -32,6 +32,8 @@ class ModelMakeCommand extends GeneratorCommand
      */
     protected $type = 'Model';
 
+    protected $useArquivo = '';
+
     /**
      * Execute the console command.
      *
@@ -253,9 +255,9 @@ class ModelMakeCommand extends GeneratorCommand
         $casts = $types->filter(fn ($type) => in_array($type, ['array', 'json', 'boolean']))
                         ->map(fn ($type, $index) => "\t\t'{$fields[$index]}' => '{$type}',");
         $arquivos = $types->filter(fn ($type) => $type == 'arquivo')->map(fn ($type, $index) => $fields[$index]);
-        if ($arquivos) {
+        if ($arquivos->count()) {
             $this->useArquivo = 'use App\Casts\Arquivo;';
-            $arquivos = $arquivos->map(fn ($arquivo) => "\t\t'{$arquivo}' => new Arquivo,")
+            $arquivos = $arquivos->map(fn ($arquivo) => "\t\t'{$arquivo}' => Arquivo::class,")
                                 ->merge(["\t];", "\tpublic \$paths = ["])
                                 ->merge($arquivos->map(fn ($arquivo) => "\t\t'{$arquivo}' => '{{ pluralModelVariable }}/{$arquivo}',"));
         }
