@@ -67,7 +67,7 @@ class ViewMakeCommand extends GeneratorCommand
 
     protected function getPath($name): string
     {
-        $name = Str::plural(Str::snake(Str::replaceFirst($this->rootNamespace(), '', $name)));
+        $name = Str::plural(Str::snake(class_basename($name)));
         
         if ($this->argument('type') == 'index')
             return getcwd().'/resources/views/admin/'.str_replace('\\', '/', $name).'/index.blade.php';
@@ -110,7 +110,9 @@ class ViewMakeCommand extends GeneratorCommand
 
     public function getIndexReplaces(): array
     {
-        $fields = explode(',', $this->option('fields'));
+        $fields = collect(explode(',', $this->option('fields')))->map(fn ($field) => explode(':', $field));
+        $types = $fields->map(fn ($field) => $field[1] ?? 'string');
+        $fields = $fields->map(fn ($field) => $field[0]);
         $search = collect($fields)->map(function ($field) {
             $label = str_replace('_', ' ', ucfirst($field));
             return  <<<FIELDS
@@ -141,7 +143,9 @@ class ViewMakeCommand extends GeneratorCommand
 
     public function getFormReplaces(): array
     {
-        $fields = explode(',', $this->option('fields'));
+        $fields = collect(explode(',', $this->option('fields')))->map(fn ($field) => explode(':', $field));
+        $types = $fields->map(fn ($field) => $field[1] ?? 'string');
+        $fields = $fields->map(fn ($field) => $field[0]);
         $fields = collect($fields)->map(function ($field) {
             $label = str_replace('_', ' ', ucfirst($field));
             return  <<<FIELDS

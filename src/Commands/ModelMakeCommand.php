@@ -228,7 +228,7 @@ class ModelMakeCommand extends GeneratorCommand
         $class = str_replace($this->getNamespace($name).'\\', '', $name);
         $plural = Str::plural(lcfirst(class_basename($class)));
         $fields = collect(explode(',', $this->option('fields')))->map(fn ($field) => explode(':', $field));
-        $types = $fields->map(fn ($field) => $field[1]);
+        $types = $fields->map(fn ($field) => $field[1] ?? 'string');
         $fields = $fields->map(fn ($field) => $field[0]);
         $fillable = "'".implode("', '", $fields->toArray())."'";
         $casts = $this->getCasts($fields, $types);

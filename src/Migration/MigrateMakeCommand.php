@@ -94,7 +94,9 @@ class MigrateMakeCommand extends Command
         }
 
         if ($fields) {
-            $fields = explode(',', $fields);
+            $fields = collect(explode(',', $fields))->map(fn ($field) => explode(':', $field));
+            $types = $fields->map(fn ($field) => $field[1] ?? 'string');
+            $fields = $fields->map(fn ($field) => $field[0]);
         }
 
         // Now we are ready to write the migration out to disk. Once we've written

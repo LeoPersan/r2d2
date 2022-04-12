@@ -70,7 +70,9 @@ class RequestMakeCommand extends GeneratorCommand
      */
     protected function replaceClass($stub, $name)
     {
-        $fields = explode(',', $this->option('fields'));
+        $fields = collect(explode(',', $this->option('fields')))->map(fn ($field) => explode(':', $field));
+        $types = $fields->map(fn ($field) => $field[1] ?? 'string');
+        $fields = $fields->map(fn ($field) => $field[0]);
         $rules = collect($fields)->map(fn ($field) => "'{$field}' => 'required|string',")->join("\n\t\t\t");
 
         return str_replace('{{ rules }}',$rules,parent::replaceClass($stub, $name));
