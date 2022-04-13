@@ -32,7 +32,8 @@ class ModelMakeCommand extends GeneratorCommand
      */
     protected $type = 'Model';
 
-    protected $useArquivo = '';
+    protected $uses = [];
+    protected $arquivos = [];
 
     /**
      * Execute the console command.
@@ -232,17 +233,18 @@ class ModelMakeCommand extends GeneratorCommand
         $fields = $fields->map(fn ($field) => $field[0]);
         $fillable = "'".implode("', '", $fields->toArray())."'";
         $casts = $this->getCasts($fields, $types);
+        $uses = collect($this->uses)->unique()->map(fn ($use) => "use {$use};")->implode("\n");
 
         return str_replace(
             [
                 'DummyCasts', '{{ casts }}', '{{casts}}',
-                'DummyUseArquivo', '{{ useArquivo }}', '{{useArquivo}}',
+                'DummyUses', '{{ uses }}', '{{uses}}',
                 'DummyPluralModelVariable', '{{ pluralModelVariable }}', '{{pluralModelVariable}}',
                 'DummyFillable', '{{ fillable }}', '{{fillable}}',
             ],
             [
                 $casts, $casts, $casts,
-                $this->useArquivo, $this->useArquivo, $this->useArquivo,
+                $uses, $uses, $uses,
                 $plural, $plural, $plural,
                 $fillable, $fillable, $fillable,
             ],
@@ -252,11 +254,11 @@ class ModelMakeCommand extends GeneratorCommand
 
     public function getCasts(Collection $fields, Collection $types): string
     {
-        $casts = $types->filter(fn ($type, $index) => method_exists($this, 'getCast'.ucfirst($type)))
-                        ->map(fn ($type, $index) => $this->{'getCast'.ucfirst($type)}($fields[$index]));
-        if ($this->useArquivo) {
-            $paths = $types->filter(fn ($type, $index) => $type == 'arquivo')->map(
-                fn ($type, $index) => "\t\t'{$fields[$index]}' => '{{ pluralModelVariable }}/{$fields[$index]}',"
+        $casts = $types->filter(fn ($type, $index) => method_exists($this, 'getCast'.Str::studly($type)))
+                        ->map(fn ($type, $index) => $this->{'getCast'.Str::studly($type)}($fields[$index]));
+        if ($this->arquivos) {
+            $paths = collect($this->arquivos)->map(
+                fn ($field) => "\t\t'{$field}' => '{{ pluralModelVariable }}/{$field}',"
             );
             $casts = $casts->merge(["\t];", "\tpublic \$paths = ["])->merge($paths);
         }
@@ -278,9 +280,41 @@ class ModelMakeCommand extends GeneratorCommand
         return "\t\t'{$field}' => 'boolean',";
     }
 
-    public function getCastArquivo(string $field): string
+    public function getCastCnpj($field)
     {
-        $this->useArquivo = 'use App\Casts\Arquivo;';
+        $this->uses[] = 'App\Casts\Cnpj';
+        return "\t\t'{$field}' => Cnpj::class,";
+    }
+
+    public function getCastCpf($field)
+    {
+        $this->uses[] = 'App\Casts\Cpf';
+        return "\t\t'{$field}' => Cpf::class,";
+    }
+
+    public function getRuleCpfCnpj($field)
+    {
+        $this->uses[] = 'App\Casts\CpfCnpj';
+        return "\t\t'{$field}' => CpfCnpj::class,";
+    }
+
+    public function getCastPdf($field)
+    {
+        $this->uses[] = 'App\Casts\Arquivo';
+        $this->arquivos[] = $field;
         return "\t\t'{$field}' => Arquivo::class,";
+    }
+
+    public function getCastImagem($field)
+    {
+        $this->uses[] = 'App\Casts\Arquivo';
+        $this->arquivos[] = $field;
+        return "\t\t'{$field}' => Arquivo::class,";
+    }
+
+    public function getCastTelefone($field)
+    {
+        $this->uses[] = 'App\Casts\Telefone';
+        return "\t\t'{$field}' => Telefone::class,";
     }
 }
