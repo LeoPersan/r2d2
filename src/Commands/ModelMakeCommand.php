@@ -41,7 +41,7 @@ class ModelMakeCommand extends GeneratorCommand
      */
     public function handle()
     {
-        if (parent::handle() === false && ! $this->option('force')) {
+        if (parent::handle() === false && !$this->option('force')) {
             return false;
         }
 
@@ -165,8 +165,8 @@ class ModelMakeCommand extends GeneratorCommand
     protected function getStub()
     {
         return $this->option('pivot')
-                    ? $this->resolveStubPath('/stubs/model.pivot.stub')
-                    : $this->resolveStubPath('/stubs/model.stub');
+            ? $this->resolveStubPath('/stubs/model.pivot.stub')
+            : $this->resolveStubPath('/stubs/model.stub');
     }
 
     /**
@@ -178,8 +178,8 @@ class ModelMakeCommand extends GeneratorCommand
     protected function resolveStubPath($stub)
     {
         return file_exists($customPath = $this->laravel->basePath(trim($stub, '/')))
-                        ? $customPath
-                        : __DIR__.$stub;
+            ? $customPath
+            : __DIR__.$stub;
     }
 
     /**
@@ -241,10 +241,10 @@ class ModelMakeCommand extends GeneratorCommand
                 'DummyFillable', '{{ fillable }}', '{{fillable}}',
             ],
             [
-                $casts,$casts,$casts,
-                $this->useArquivo,$this->useArquivo,$this->useArquivo,
-                $plural,$plural,$plural,
-                $fillable,$fillable,$fillable,
+                $casts, $casts, $casts,
+                $this->useArquivo, $this->useArquivo, $this->useArquivo,
+                $plural, $plural, $plural,
+                $fillable, $fillable, $fillable,
             ],
             parent::replaceClass($stub, $name)
         );
@@ -252,15 +252,35 @@ class ModelMakeCommand extends GeneratorCommand
 
     public function getCasts(Collection $fields, Collection $types): string
     {
-        $casts = $types->filter(fn ($type) => in_array($type, ['array', 'json', 'boolean']))
-                        ->map(fn ($type, $index) => "\t\t'{$fields[$index]}' => '{$type}',");
-        $arquivos = $types->filter(fn ($type) => $type == 'arquivo')->map(fn ($type, $index) => $fields[$index]);
-        if ($arquivos->count()) {
-            $this->useArquivo = 'use App\Casts\Arquivo;';
-            $arquivos = $arquivos->map(fn ($arquivo) => "\t\t'{$arquivo}' => Arquivo::class,")
-                                ->merge(["\t];", "\tpublic \$paths = ["])
-                                ->merge($arquivos->map(fn ($arquivo) => "\t\t'{$arquivo}' => '{{ pluralModelVariable }}/{$arquivo}',"));
+        $casts = $types->filter(fn ($type, $index) => method_exists($this, 'getCast'.ucfirst($type)))
+                        ->map(fn ($type, $index) => $this->{'getCast'.ucfirst($type)}($fields[$index]));
+        if ($this->useArquivo) {
+            $paths = $types->filter(fn ($type, $index) => $type == 'arquivo')->map(
+                fn ($type, $index) => "\t\t'{$fields[$index]}' => '{{ pluralModelVariable }}/{$fields[$index]}',"
+            );
+            $casts = $casts->merge(["\t];", "\tpublic \$paths = ["])->merge($paths);
         }
-        return ltrim(implode("\n", $casts->merge($arquivos)->toArray()));
+        return ltrim(implode("\n", $casts->toArray()));
+    }
+
+    public function getCastArray(string $field): string
+    {
+        return "\t\t'{$field}' => 'array',";
+    }
+
+    public function getCastJson(string $field): string
+    {
+        return "\t\t'{$field}' => 'json',";
+    }
+
+    public function getCastBoolean(string $field): string
+    {
+        return "\t\t'{$field}' => 'boolean',";
+    }
+
+    public function getCastArquivo(string $field): string
+    {
+        $this->useArquivo = 'use App\Casts\Arquivo;';
+        return "\t\t'{$field}' => Arquivo::class,";
     }
 }
