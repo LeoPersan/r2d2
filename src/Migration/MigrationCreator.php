@@ -30,6 +30,18 @@ class MigrationCreator
      */
     protected $postCreate = [];
 
+    protected $types = [
+        'email' => 'string',
+        'cpf' => 'string',
+        'telefone' => 'string',
+        'cpf' => 'string',
+        'cnpj' => 'string',
+        'cpf_cnpj' => 'string',
+        'pdf' => 'string',
+        'imagem' => 'string',
+        'fk' => 'foreignId',
+    ];
+
     /**
      * Create a new migration creator instance.
      *
@@ -155,10 +167,13 @@ class MigrationCreator
         }
 
         if ($fields) {
-            if (strpos('create', $stub) !== false)
-                $colunms = collect($fields)->map(fn ($field) => "\$table->string('{$field}');")->join("\n\t\t\t");
+            $fields = collect(explode(',', $fields))->map(fn ($field) => explode(':', $field));
+            $types = $fields->map(fn ($field) => $this->types[$field[1] ?? false] ?? $field[1] ?? 'string');
+            $fields = $fields->map(fn ($field) => $field[0]);
+            if (strpos($stub, 'create') !== false)
+                $colunms = collect($fields)->map(fn ($field, $index) => "\$table->{$types[$index]}('{$field}');")->join("\n\t\t\t");
             else {
-                $colunms = collect($fields)->map(fn ($field) => "\$table->string('{$field}')->nullable();")->join("\n\t\t\t");
+                $colunms = collect($fields)->map(fn ($field, $index) => "\$table->{$types[$index]}('{$field}')->nullable();")->join("\n\t\t\t");
                 $dropColunms = collect($fields)->map(fn ($field) => "\$table->dropColumn('{$field}');")->join("\n\t\t\t");
             }
             $stub = str_replace(
