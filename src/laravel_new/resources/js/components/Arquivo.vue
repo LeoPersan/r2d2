@@ -9,10 +9,13 @@
         },
         data() {
             return {
-                arquivos: []
+                arquivos: this.value || []
             }
         },
 		props: {
+            files: {
+                default: false
+            },
             required: {
                 type: Boolean,
                 default: false
@@ -32,7 +35,6 @@
         },
 		methods: {
             onFileChange(e) {
-                var vm = this;
 				var files = e.target.files || e.dataTransfer.files;
 				if (!files.length) return;
                 if (this.url)
@@ -45,9 +47,11 @@
                 [...files].forEach(file => {
                     let reader = new FileReader()
                     reader.onload = (e) => {
-                        vm.arquivos.push(e.target.result)
-                        if (vm.multiple) vm.$emit('change', vm.arquivos)
-                        else vm.$emit('change', vm.arquivos[0])
+                        if (vm.multiple)
+                            vm.arquivos.push(e.target.result)
+                        else
+                            vm.arquivos = e.target.result
+                        vm.$emit('change', vm.arquivos)
                     };
                     reader.readAsDataURL(file);
                 });
