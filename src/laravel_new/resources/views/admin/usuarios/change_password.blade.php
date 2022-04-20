@@ -1,5 +1,7 @@
 @extends('adminlte::page')
 
+@section('title_prefix', __('Trocar Senha') . ' | ')
+
 @section('content')
 <div class="container">
     <div class="row justify-content-center">

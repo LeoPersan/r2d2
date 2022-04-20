@@ -1,5 +1,7 @@
 @extends('adminlte::page')
 
+@section('title_prefix', __('Usuários'))
+
 @section('content_header')
 <div class="d-flex justify-content-between">
     <h1>Usuários</h1>

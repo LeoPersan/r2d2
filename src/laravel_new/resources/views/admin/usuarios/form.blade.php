@@ -1,5 +1,7 @@
 @extends('adminlte::page')
 
+@section('title_prefix', __('Usuários') . ' | ')
+
 @section('content_header')
     <h1>Usuário</h1>
     <label>{{ $data->id ? $data->nome : 'Novo usuário - SENHA: 123456' }}</label>

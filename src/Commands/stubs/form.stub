@@ -1,5 +1,7 @@
 @extends('adminlte::page')
 
+@section('title_prefix', __('{{ pluralModel }}') . ' | ')
+
 @section('content_header')
     <h1>{{ class }}</h1>
     <label>{{ $data->id ? $data->nome : 'Novo {{ modelVariable }}' }}</label>

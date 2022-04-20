@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title_prefix', __('Meus Dados'))
+@section('title_prefix', __('Meus Dados') . ' | ')
 
 @section('content')
     <div class="card" :json="[form.setData({{ $data }})]">
