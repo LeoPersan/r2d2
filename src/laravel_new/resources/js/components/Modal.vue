@@ -9,7 +9,7 @@
                     <p>{{text}}</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" v-if="btn_cancel != ''">{{btn_cancel}}</button>
+                    <button type="button" class="btn btn-secondary" v-on:click="hide" v-if="btn_cancel != ''">{{btn_cancel}}</button>
                     <button type="button" class="btn btn-primary" v-on:click="runConfirmFn" v-if="btn_confirm != ''">{{btn_confirm}}</button>
                 </div>
             </div>
