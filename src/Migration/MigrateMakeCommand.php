@@ -6,18 +6,12 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Console\Migrations\TableGuesser;
 use Illuminate\Support\Composer;
 use Illuminate\Support\Str;
-use Leopersan\R2d2\Commands\Traits\ParseFields;
+use Leopersan\R2d2\Traits\ParseFields;
 use Symfony\Component\Process\Process;
 
 class MigrateMakeCommand extends Command
 {
     use ParseFields;
-
-    protected array $types = [
-        'imagem' => 'string',
-        'email' => 'string',
-        'pdf' => 'string',
-    ];
 
     /**
      * The console command signature.

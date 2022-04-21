@@ -3,10 +3,10 @@
 namespace Leopersan\R2d2\Commands\Model;
 
 use Illuminate\Console\Concerns\CreatesMatchingTest;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Leopersan\R2d2\Commands\GeneratorCommand;
-use Leopersan\R2d2\Commands\Traits\ParseFields;
+use Leopersan\R2d2\Traits\ParseFields;
+use Leopersan\R2d2\Types\InterfaceType;
 use Symfony\Component\Console\Input\InputOption;
 
 class ModelMakeCommand extends GeneratorCommand
@@ -231,89 +231,26 @@ class ModelMakeCommand extends GeneratorCommand
         $class = str_replace($this->getNamespace($name).'\\', '', $name);
         $plural = Str::plural(lcfirst(class_basename($class)));
         $fillable = "'".implode("', '", $this->getOnlyFields()->toArray())."'";
-        $casts = $this->getCasts();
-        $uses = collect($this->uses)->unique()->map(fn ($use) => "use {$use};")->implode("\n");
+        $casts = $this->getFields()->map(fn (InterfaceType $field) => $field->getCast())->filter()->implode("\n\t\t");
+        $paths = $this->getFields()->map(fn (InterfaceType $field) => $field->getPath())->filter()->implode("\n\t\t");
+        $uses = $this->getFields()->map(fn (InterfaceType $field) => $field->getUse())->filter()->unique()->implode("\n");
 
         return str_replace(
             [
                 'DummyCasts', '{{ casts }}', '{{casts}}',
+                'DummyPaths', '{{ paths }}', '{{paths}}',
                 'DummyUses', '{{ uses }}', '{{uses}}',
                 'DummyPluralModelVariable', '{{ pluralModelVariable }}', '{{pluralModelVariable}}',
                 'DummyFillable', '{{ fillable }}', '{{fillable}}',
             ],
             [
                 $casts, $casts, $casts,
+                $paths, $paths, $paths,
                 $uses, $uses, $uses,
                 $plural, $plural, $plural,
                 $fillable, $fillable, $fillable,
             ],
             parent::replaceClass($stub, $name)
         );
-    }
-
-    public function getCasts(): string
-    {
-        $casts = $this->getFields()->filter(fn ($field) => method_exists($this, 'getCast'.Str::studly($field['type'])))
-                        ->map(fn ($field) => $this->{'getCast'.Str::studly($field['type'])}($field['name']));
-        if ($this->arquivos) {
-            $paths = collect($this->arquivos)->map(
-                fn ($field) => "\t\t'{$field}' => '{{ pluralModelVariable }}/{$field}',"
-            );
-            $casts = $casts->merge(["\t];", "\tpublic \$paths = ["])->merge($paths);
-        }
-        return ltrim(implode("\n", $casts->toArray()));
-    }
-
-    public function getCastArray(string $field): string
-    {
-        return "\t\t'{$field}' => 'array',";
-    }
-
-    public function getCastJson(string $field): string
-    {
-        return "\t\t'{$field}' => 'json',";
-    }
-
-    public function getCastBoolean(string $field): string
-    {
-        return "\t\t'{$field}' => 'boolean',";
-    }
-
-    public function getCastCnpj($field)
-    {
-        $this->uses[] = 'App\Casts\Cnpj';
-        return "\t\t'{$field}' => Cnpj::class,";
-    }
-
-    public function getCastCpf($field)
-    {
-        $this->uses[] = 'App\Casts\Cpf';
-        return "\t\t'{$field}' => Cpf::class,";
-    }
-
-    public function getRuleCpfCnpj($field)
-    {
-        $this->uses[] = 'App\Casts\CpfCnpj';
-        return "\t\t'{$field}' => CpfCnpj::class,";
-    }
-
-    public function getCastPdf($field)
-    {
-        $this->uses[] = 'App\Casts\Arquivo';
-        $this->arquivos[] = $field;
-        return "\t\t'{$field}' => Arquivo::class,";
-    }
-
-    public function getCastImagem($field)
-    {
-        $this->uses[] = 'App\Casts\Arquivo';
-        $this->arquivos[] = $field;
-        return "\t\t'{$field}' => Arquivo::class,";
-    }
-
-    public function getCastTelefone($field)
-    {
-        $this->uses[] = 'App\Casts\Telefone';
-        return "\t\t'{$field}' => Telefone::class,";
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Leopersan\R2d2\Types\InterfaceType;
 
 class MigrationCreator
 {
@@ -170,11 +171,11 @@ class MigrationCreator
         if (!$fields)
             return $stub;
 
-        $colunms = $fields->map(fn ($field) => "\$table->{$field['type']}('{$field['name']}');");
+        $colunms = $fields->map(fn (InterfaceType $field) => "\$table->{$field->getField()}('{$field->getName()}');");
         $dropColunms = '';
         if (strpos($stub, 'form') !== false) {
             $colunms = $colunms->map(fn ($colunm) => rtrim($colunm, ';').'->nullable();');
-            $dropColunms = $fields->map(fn ($field) => "\$table->dropColumn('{$field['name']}');")->join("\n\t\t\t");
+            $dropColunms = $fields->map(fn (InterfaceType $field) => "\$table->dropColumn('{$field->getName()}');")->join("\n\t\t\t");
         }
         $colunms = $colunms->join("\n\t\t\t");
         return str_replace(

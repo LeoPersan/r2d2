@@ -6,7 +6,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Illuminate\Support\Str;
 use Leopersan\R2d2\Commands\GeneratorCommand;
-use Leopersan\R2d2\Commands\Traits\ParseFields;
+use Leopersan\R2d2\Traits\ParseFields;
+use Leopersan\R2d2\Types\InterfaceType;
 
 class ViewMakeCommand extends GeneratorCommand
 {
@@ -114,19 +115,16 @@ class ViewMakeCommand extends GeneratorCommand
 
     public function getIndexReplaces(): array
     {
-        $search = $this->getOnlyFields()->map(function ($field) {
-            $label = str_replace('_', ' ', ucfirst($field));
-            return  <<<FIELDS
-            <div class="form-group col-sm-9 col-md-10">
-                                <input type="text" name="$field" class="form-control" placeholder="$label" value="{{ request()->$field }}">
-                            </div>
-            FIELDS;
-        })->join("\n\t\t\t\t");
-        $columns = $this->getOnlyFields()->map(
-            fn ($field) => '<th>'.(str_replace('_', ' ', ucfirst($field))).'</th>'
+        $search = $this->getFields()->map(fn (InterfaceType $field) => <<<FIELDS
+        <div class="form-group col-sm-9 col-md-10">
+                            <input type="text" name="{$field->getName()}" class="form-control" placeholder="{$field->getLabel()}" value="{{ request()->{$field->getName()} }}">
+                        </div>
+        FIELDS)->join("\n\t\t\t\t");
+        $columns = $this->getFields()->map(
+            fn (InterfaceType $field) => '<th>'.(str_replace('_', ' ', ucfirst($field->getName()))).'</th>'
         )->join("\n\t\t\t\t\t\t");
-        $rows = $this->getOnlyFields()->map(
-            fn ($field) => "<td>{{ \$item->{$field} }}</td>"
+        $rows = $this->getFields()->map(
+            fn (InterfaceType $field) => "<td>{{ \$item->{$field->getName()} }}</td>"
         )->join("\n\t\t\t\t\t\t");
 
         return [
@@ -158,11 +156,11 @@ class ViewMakeCommand extends GeneratorCommand
             'pdf' => 'fieldPdf',
             'imagem' => 'fieldImagem',
         ];
-        $fields = $this->getFields()->map(function ($field) use ($methods) {
-            $label = str_replace('_', ' ', ucfirst($field['name']));
+        $fields = $this->getFields()->map(function (InterfaceType $field) use ($methods) {
+            $label = str_replace('_', ' ', ucfirst($field->getName()));
             return '<div class="form-group col-md-12">'."\n\t\t\t\t\t\t"
             .'<label>'.$label.'</label>'."\n\t\t\t\t\t\t"
-            .$this->{$methods[$field['type']]}($field['name'])."\n\t\t\t\t\t"
+            .$this->{$methods[$field->getType()]}($field->getName())."\n\t\t\t\t\t"
             .'</div>';
         })->join("\n\t\t\t\t\t");
 

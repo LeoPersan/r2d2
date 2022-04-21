@@ -15,6 +15,9 @@ class {{ class }} extends CawModel
     protected $casts = [
         {{ casts }}
     ];
+    public $paths = [
+        {{ paths }}
+    ];
 
     public function scopePesquisar(Builder $builder, Request $request)
     {
