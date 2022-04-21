@@ -6,10 +6,19 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Console\Migrations\TableGuesser;
 use Illuminate\Support\Composer;
 use Illuminate\Support\Str;
+use Leopersan\R2d2\Commands\Traits\ParseFields;
 use Symfony\Component\Process\Process;
 
 class MigrateMakeCommand extends Command
 {
+    use ParseFields;
+
+    protected array $types = [
+        'imagem' => 'string',
+        'email' => 'string',
+        'pdf' => 'string',
+    ];
+
     /**
      * The console command signature.
      *
@@ -75,8 +84,6 @@ class MigrateMakeCommand extends Command
 
         $create = $this->input->getOption('create') ?: false;
 
-        $fields = $this->input->getOption('fields') ?: false;
-
         // If no table was given as an option but a create option is given then we
         // will use the "create" option as the table name. This allows the devs
         // to pass a table name into this option as a short-cut for creating.
@@ -96,7 +103,7 @@ class MigrateMakeCommand extends Command
         // Now we are ready to write the migration out to disk. Once we've written
         // the migration out, we will dump-autoload for the entire framework to
         // make sure that the migrations are registered by the class loaders.
-        $this->writeMigration($name, $table, $create, $fields);
+        $this->writeMigration($name, $table, $create);
 
         Process::fromShellCommandline('composer dumpautoload')->mustRun();
     }
@@ -109,10 +116,10 @@ class MigrateMakeCommand extends Command
      * @param  bool  $create
      * @return string
      */
-    protected function writeMigration($name, $table, $create, $fields)
+    protected function writeMigration($name, $table, $create)
     {
         $file = $this->creator->create(
-            $name, $this->getMigrationPath(), $table, $create, $fields
+            $name, $this->getMigrationPath(), $table, $create, $this->getFields()
         );
 
         if (! $this->option('fullpath')) {

@@ -6,11 +6,12 @@ use Illuminate\Console\Concerns\CreatesMatchingTest;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Leopersan\R2d2\Commands\GeneratorCommand;
+use Leopersan\R2d2\Commands\Traits\ParseFields;
 use Symfony\Component\Console\Input\InputOption;
 
 class ModelMakeCommand extends GeneratorCommand
 {
-    use CreatesMatchingTest;
+    use CreatesMatchingTest, ParseFields;
 
     /**
      * The console command name.
@@ -229,11 +230,8 @@ class ModelMakeCommand extends GeneratorCommand
     {
         $class = str_replace($this->getNamespace($name).'\\', '', $name);
         $plural = Str::plural(lcfirst(class_basename($class)));
-        $fields = collect(explode(',', $this->option('fields')))->map(fn ($field) => explode(':', $field));
-        $types = $fields->map(fn ($field) => $field[1] ?? 'string');
-        $fields = $fields->map(fn ($field) => $field[0]);
-        $fillable = "'".implode("', '", $fields->toArray())."'";
-        $casts = $this->getCasts($fields, $types);
+        $fillable = "'".implode("', '", $this->getOnlyFields()->toArray())."'";
+        $casts = $this->getCasts();
         $uses = collect($this->uses)->unique()->map(fn ($use) => "use {$use};")->implode("\n");
 
         return str_replace(
@@ -253,10 +251,10 @@ class ModelMakeCommand extends GeneratorCommand
         );
     }
 
-    public function getCasts(Collection $fields, Collection $types): string
+    public function getCasts(): string
     {
-        $casts = $types->filter(fn ($type, $index) => method_exists($this, 'getCast'.Str::studly($type)))
-                        ->map(fn ($type, $index) => $this->{'getCast'.Str::studly($type)}($fields[$index]));
+        $casts = $this->getFields()->filter(fn ($field) => method_exists($this, 'getCast'.Str::studly($field['type'])))
+                        ->map(fn ($field) => $this->{'getCast'.Str::studly($field['type'])}($field['name']));
         if ($this->arquivos) {
             $paths = collect($this->arquivos)->map(
                 fn ($field) => "\t\t'{$field}' => '{{ pluralModelVariable }}/{$field}',"

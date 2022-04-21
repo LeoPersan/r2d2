@@ -6,9 +6,12 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Illuminate\Support\Str;
 use Leopersan\R2d2\Commands\GeneratorCommand;
+use Leopersan\R2d2\Commands\Traits\ParseFields;
 
 class ViewMakeCommand extends GeneratorCommand
 {
+    use ParseFields;
+
     /**
      * The console command name.
      *
@@ -111,10 +114,7 @@ class ViewMakeCommand extends GeneratorCommand
 
     public function getIndexReplaces(): array
     {
-        $fields = collect(explode(',', $this->option('fields')))->map(fn ($field) => explode(':', $field));
-        $types = $fields->map(fn ($field) => $field[1] ?? 'string');
-        $fields = $fields->map(fn ($field) => $field[0]);
-        $search = collect($fields)->map(function ($field) {
+        $search = $this->getOnlyFields()->map(function ($field) {
             $label = str_replace('_', ' ', ucfirst($field));
             return  <<<FIELDS
             <div class="form-group col-sm-9 col-md-10">
@@ -122,10 +122,10 @@ class ViewMakeCommand extends GeneratorCommand
                             </div>
             FIELDS;
         })->join("\n\t\t\t\t");
-        $columns = collect($fields)->map(
+        $columns = $this->getOnlyFields()->map(
             fn ($field) => '<th>'.(str_replace('_', ' ', ucfirst($field))).'</th>'
         )->join("\n\t\t\t\t\t\t");
-        $rows = collect($fields)->map(
+        $rows = $this->getOnlyFields()->map(
             fn ($field) => "<td>{{ \$item->{$field} }}</td>"
         )->join("\n\t\t\t\t\t\t");
 
@@ -144,9 +144,6 @@ class ViewMakeCommand extends GeneratorCommand
 
     public function getFormReplaces(): array
     {
-        $fields = collect(explode(',', $this->option('fields')))->map(fn ($field) => explode(':', $field));
-        $types = $fields->map(fn ($field) => $field[1] ?? 'string');
-        $fields = $fields->map(fn ($field) => $field[0]);
         $methods = [
             'string' => 'fieldString',
             'integer' => 'fieldInteger',
@@ -161,11 +158,11 @@ class ViewMakeCommand extends GeneratorCommand
             'pdf' => 'fieldPdf',
             'imagem' => 'fieldImagem',
         ];
-        $fields = collect($types)->map(function ($type, $index) use ($fields, $methods) {
-            $label = str_replace('_', ' ', ucfirst($fields[$index]));
+        $fields = $this->getFields()->map(function ($field) use ($methods) {
+            $label = str_replace('_', ' ', ucfirst($field['name']));
             return '<div class="form-group col-md-12">'."\n\t\t\t\t\t\t"
             .'<label>'.$label.'</label>'."\n\t\t\t\t\t\t"
-            .$this->{$methods[$type]}($fields[$index])."\n\t\t\t\t\t"
+            .$this->{$methods[$field['type']]}($field['name'])."\n\t\t\t\t\t"
             .'</div>';
         })->join("\n\t\t\t\t\t");
 

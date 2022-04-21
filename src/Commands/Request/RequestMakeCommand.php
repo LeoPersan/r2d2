@@ -4,10 +4,13 @@ namespace Leopersan\R2d2\Commands\Request;
 
 use Illuminate\Support\Str;
 use Leopersan\R2d2\Commands\GeneratorCommand;
+use Leopersan\R2d2\Commands\Traits\ParseFields;
 use Symfony\Component\Console\Input\InputOption;
 
 class RequestMakeCommand extends GeneratorCommand
 {
+    use ParseFields;
+
     /**
      * The console command name.
      *
@@ -74,11 +77,8 @@ class RequestMakeCommand extends GeneratorCommand
      */
     protected function replaceClass($stub, $name)
     {
-        $fields = collect(explode(',', $this->option('fields')))->map(fn ($field) => explode(':', $field));
-        $types = $fields->map(fn ($field) => $field[1] ?? 'string');
-        $fields = $fields->map(fn ($field) => $field[0]);
-        $rules = $types->filter(fn ($type, $index) => method_exists($this, 'getRule'.Str::studly($type)))
-                        ->map(fn ($type, $index) => $this->{'getRule'.Str::studly($type)}($fields[$index]))
+        $rules = $this->getFields()->filter(fn ($field) => method_exists($this, 'getRule'.Str::studly($field['type'])))
+                        ->map(fn ($field) => $this->{'getRule'.Str::studly($field['type'])}($field['name']))
                         ->join("\n\t\t\t");
 
         return str_replace([

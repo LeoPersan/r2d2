@@ -4,6 +4,7 @@ namespace Leopersan\R2d2\Migration;
 
 use Closure;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -66,7 +67,7 @@ class MigrationCreator
      *
      * @throws \Exception
      */
-    public function create($name, $path, $table = null, $create = false, $fields = false)
+    public function create($name, $path, $table = null, $create = false, Collection $fields = null)
     {
         $this->ensureMigrationDoesntAlreadyExist($name, $path);
 
@@ -149,7 +150,7 @@ class MigrationCreator
      * @param  string|null  $table
      * @return string
      */
-    protected function populateStub($name, $stub, $table, $fields)
+    protected function populateStub($name, $stub, $table, Collection $fields = null)
     {
         $stub = str_replace(
             ['DummyClass', '{{ class }}', '{{class}}'],
@@ -166,26 +167,26 @@ class MigrationCreator
             );
         }
 
-        if ($fields) {
-            $fields = collect(explode(',', $fields))->map(fn ($field) => explode(':', $field));
-            $types = $fields->map(fn ($field) => $this->types[$field[1] ?? false] ?? $field[1] ?? 'string');
-            $fields = $fields->map(fn ($field) => $field[0]);
-            if (strpos($stub, 'create') !== false)
-                $colunms = collect($fields)->map(fn ($field, $index) => "\$table->{$types[$index]}('{$field}');")->join("\n\t\t\t");
-            else {
-                $colunms = collect($fields)->map(fn ($field, $index) => "\$table->{$types[$index]}('{$field}')->nullable();")->join("\n\t\t\t");
-                $dropColunms = collect($fields)->map(fn ($field) => "\$table->dropColumn('{$field}');")->join("\n\t\t\t");
-            }
-            $stub = str_replace(
-                ['DummyFields', '{{ colunms }}', '{{colunms}}'],
-                $colunms, str_replace(
-                    ['DummyDropFields', '{{ dropColunms }}', '{{dropColunms}}'],
-                    $dropColunms ?? '', $stub
-                )
-            );
-        }
+        if (!$fields)
+            return $stub;
 
-        return $stub;
+        $colunms = $fields->map(fn ($field) => "\$table->{$field['type']}('{$field['name']}');");
+        $dropColunms = '';
+        if (strpos($stub, 'form') !== false) {
+            $colunms = $colunms->map(fn ($colunm) => rtrim($colunm, ';').'->nullable();');
+            $dropColunms = $fields->map(fn ($field) => "\$table->dropColumn('{$field['name']}');")->join("\n\t\t\t");
+        }
+        $colunms = $colunms->join("\n\t\t\t");
+        return str_replace(
+            [
+                'DummyFields', '{{ colunms }}', '{{colunms}}',
+                'DummyDropFields', '{{ dropColunms }}', '{{dropColunms}}'
+            ],
+            [
+                $colunms, $colunms, $colunms,
+                $dropColunms, $dropColunms, $dropColunms
+            ], $stub
+        );
     }
 
     /**
