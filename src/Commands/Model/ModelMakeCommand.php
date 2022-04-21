@@ -1,10 +1,11 @@
 <?php
 
-namespace Leopersan\R2d2\Commands;
+namespace Leopersan\R2d2\Commands\Model;
 
 use Illuminate\Console\Concerns\CreatesMatchingTest;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Leopersan\R2d2\Commands\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 class ModelMakeCommand extends GeneratorCommand

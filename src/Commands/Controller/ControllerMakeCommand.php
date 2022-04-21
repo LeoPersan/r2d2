@@ -1,10 +1,11 @@
 <?php
 
-namespace Leopersan\R2d2\Commands;
+namespace Leopersan\R2d2\Commands\Controller;
 
 use Illuminate\Console\Concerns\CreatesMatchingTest;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Leopersan\R2d2\Commands\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 class ControllerMakeCommand extends GeneratorCommand

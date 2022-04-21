@@ -1,8 +1,9 @@
 <?php
 
-namespace Leopersan\R2d2\Commands;
+namespace Leopersan\R2d2\Commands\Request;
 
 use Illuminate\Support\Str;
+use Leopersan\R2d2\Commands\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 class RequestMakeCommand extends GeneratorCommand

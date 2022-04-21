@@ -1,9 +1,10 @@
 <?php
 
-namespace Leopersan\R2d2\Commands;
+namespace Leopersan\R2d2\Commands\Policy;
 
 use Illuminate\Config\Repository;
 use Illuminate\Support\Str;
+use Leopersan\R2d2\Commands\GeneratorCommand;
 use LogicException;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Finder\Finder;

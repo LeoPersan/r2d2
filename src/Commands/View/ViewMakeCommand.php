@@ -1,10 +1,11 @@
 <?php
 
-namespace Leopersan\R2d2\Commands;
+namespace Leopersan\R2d2\Commands\View;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Illuminate\Support\Str;
+use Leopersan\R2d2\Commands\GeneratorCommand;
 
 class ViewMakeCommand extends GeneratorCommand
 {
