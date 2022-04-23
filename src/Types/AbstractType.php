@@ -80,7 +80,7 @@ abstract class AbstractType implements InterfaceType
 
     public function getFormHtml(): string
     {
-        return $this->form_html
+        return isset($this->form_html)
             ? str_replace('{$name}', $this->getName(), $this->form_html)
             : '<input type="text" class="form-control" v-model="form.data.'.$this->getName().'" maxlength="190" required/>';
     }
