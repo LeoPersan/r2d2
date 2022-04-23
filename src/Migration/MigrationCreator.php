@@ -171,13 +171,13 @@ class MigrationCreator
         if (!$fields)
             return $stub;
 
-        $colunms = $fields->map(fn (InterfaceType $field) => "\$table->{$field->getField()}('{$field->getName()}');");
-        $dropColunms = '';
-        if (strpos($stub, 'form') !== false) {
-            $colunms = $colunms->map(fn ($colunm) => rtrim($colunm, ';').'->nullable();');
-            $dropColunms = $fields->map(fn (InterfaceType $field) => "\$table->dropColumn('{$field->getName()}');")->join("\n\t\t\t");
-        }
-        $colunms = $colunms->join("\n\t\t\t");
+        $colunms = $fields->map(
+            fn (InterfaceType $field) => $field->getMigrationUpField(strpos($stub, 'form') ? 'form' : 'create')
+        )->join("\n\t\t\t");
+        $dropColunms = $fields->map(
+            fn (InterfaceType $field) => $field->getMigrationDownField(strpos($stub, 'form') ? 'form' : 'create')
+        )->join("\n\t\t\t");
+
         return str_replace(
             [
                 'DummyFields', '{{ colunms }}', '{{colunms}}',

@@ -52,6 +52,20 @@ abstract class AbstractType implements InterfaceType
         return $this->field ?? $this->getType();
     }
 
+    public function getMigrationUpField(string $type = 'create'): string
+    {
+        return $type == 'create'
+                ? "\$table->{$this->getField()}('{$this->getName()}');"
+                : "\$table->{$this->getField()}('{$this->getName()}')->nullable();";
+    }
+
+    public function getMigrationDownField(string $type = 'create'): string
+    {
+        return $type == 'create'
+                ? ''
+                : "\$table->dropColumn('{$this->getName()}');";
+    }
+
     public function getLabel(): string
     {
         return str_replace('_', ' ', ucfirst($this->getName()));

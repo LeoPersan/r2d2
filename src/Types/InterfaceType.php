@@ -10,6 +10,8 @@ interface InterfaceType
     public function getCast(): string;
     public function getUse(): string;
     public function getField(): string;
+    public function getMigrationUpField(string $type = 'create'): string;
+    public function getMigrationDownField(string $type = 'create'): string;
     public function getLabel(): string;
     public function getPath(): string;
     public function getRule(): string;
