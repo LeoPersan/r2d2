@@ -39,6 +39,8 @@ class {{ class }} extends CawModel
         return $builder->whereAtivo((bool) $ativo);
     }
 
+    {{ belongsTo }}
+
     public static function boot()
     {
         parent::boot();

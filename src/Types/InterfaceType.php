@@ -17,5 +17,6 @@ interface InterfaceType
     public function getRule(): string;
     public function getUseRequest(): string;
     public function getFormHtml(): string;
+    public function getBelongsTo(): string;
     public function isArquivo(): bool;
 }

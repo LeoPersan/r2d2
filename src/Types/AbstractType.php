@@ -98,4 +98,9 @@ abstract class AbstractType implements InterfaceType
             ? str_replace('{$name}', $this->getName(), $this->form_html)
             : '<input type="text" class="form-control" v-model="form.data.'.$this->getName().'" maxlength="190" required/>';
     }
+
+    public function getBelongsTo(): string
+    {
+        return '';
+    }
 }

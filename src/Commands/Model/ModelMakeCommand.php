@@ -234,12 +234,14 @@ class ModelMakeCommand extends GeneratorCommand
         $casts = $this->getFields()->map(fn (InterfaceType $field) => $field->getCast())->filter()->implode("\n\t\t");
         $paths = $this->getFields()->map(fn (InterfaceType $field) => $field->getPath())->filter()->implode("\n\t\t");
         $uses = $this->getFields()->map(fn (InterfaceType $field) => $field->getUse())->filter()->unique()->implode("\n");
+        $belongsTo = $this->getFields()->map(fn (InterfaceType $field) => $field->getBelongsTo())->filter()->unique()->implode("\n");
 
         return str_replace(
             [
                 'DummyCasts', '{{ casts }}', '{{casts}}',
                 'DummyPaths', '{{ paths }}', '{{paths}}',
                 'DummyUses', '{{ uses }}', '{{uses}}',
+                'DummyBelongsTo', '{{ belongsTo }}', '{{belongsTo}}',
                 'DummyPluralModelVariable', '{{ pluralModelVariable }}', '{{pluralModelVariable}}',
                 'DummyFillable', '{{ fillable }}', '{{fillable}}',
             ],
@@ -247,6 +249,7 @@ class ModelMakeCommand extends GeneratorCommand
                 $casts, $casts, $casts,
                 $paths, $paths, $paths,
                 $uses, $uses, $uses,
+                $belongsTo, $belongsTo, $belongsTo,
                 $plural, $plural, $plural,
                 $fillable, $fillable, $fillable,
             ],
