@@ -11,4 +11,5 @@ class ImagemType extends AbstractType
     protected bool $arquivo = true;
     protected string $useRequest = "App\Rules\Imagem";
     protected string $rule = "new Imagem";
+    protected string $form_html = '<Imagem v-model="form.data.{$name}" :required="true"></Imagem>';
 }

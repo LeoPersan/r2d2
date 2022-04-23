@@ -11,4 +11,5 @@ class PdfType extends AbstractType
     protected bool $arquivo = true;
     protected string $useRequest = "App\Rules\Pdf";
     protected string $rule = "new Pdf";
+    protected string $form_html = '<Arquivo accept="application/pdf" v-model="form.data.{$name}" :required="true"></Arquivo>';
 }
